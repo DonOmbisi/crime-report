@@ -1,10 +1,17 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
 import MobileMenu from "./MobileMenu";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { data: session } = useSession();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <>
@@ -61,6 +68,33 @@ export default function Navbar() {
               >
                 Resources
               </Link>
+              {isClient && (
+                <>
+                  {session ? (
+                    <Link
+                      href="/dashboard"
+                      className="text-sm text-zinc-400 hover:text-white transition-colors"
+                    >
+                      Dashboard
+                    </Link>
+                  ) : (
+                    <>
+                      <Link
+                        href="/auth/signin"
+                        className="text-sm text-zinc-400 hover:text-white transition-colors"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/auth/signup"
+                        className="text-sm bg-sky-600 hover:bg-sky-700 px-3 py-1 rounded-md transition-colors"
+                      >
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Emergency Button */}

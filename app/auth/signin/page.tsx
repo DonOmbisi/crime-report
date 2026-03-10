@@ -1,8 +1,10 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+export const dynamic = 'force-dynamic';
 
 export default function SignIn() {
   const router = useRouter();
@@ -26,7 +28,13 @@ export default function SignIn() {
       if (result?.error) {
         setError("Invalid credentials");
       } else {
-        router.push("/dashboard");
+        // Get session to check role
+        const session = await getSession();
+        if (session?.user?.role === "USER") {
+          router.push("/submit-report");
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch (error) {
       setError("An error occurred during sign in");
@@ -42,7 +50,7 @@ export default function SignIn() {
           Welcome Back
         </h1>
         <h2 className="text-center text-sm text-neutral-400">
-          Sign in to access your admin dashboard
+          Sign in to your account
         </h2>
       </div>
 

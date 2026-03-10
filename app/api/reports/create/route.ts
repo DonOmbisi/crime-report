@@ -15,6 +15,9 @@ export async function POST(request: Request) {
       longitude,
       image,
       status,
+      anonymous,
+      reporterName,
+      userId,
     } = await request.json();
 
     const report = await prisma.report.create({
@@ -29,6 +32,8 @@ export async function POST(request: Request) {
         longitude: longitude || null,
         image: image || null,
         status: status || "PENDING",
+        userId: userId || null,
+        reporterName: reporterName || null,
       },
     });
 

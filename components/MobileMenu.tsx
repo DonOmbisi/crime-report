@@ -1,4 +1,7 @@
+"use client";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -6,6 +9,13 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+  const { data: session } = useSession();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   if (!isOpen) return null;
 
   return (
@@ -76,6 +86,47 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             >
               Contact
             </Link>
+            {isClient && (
+              <>
+                {session ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="text-sm text-zinc-400 hover:text-white transition-colors"
+                      onClick={onClose}
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={() => {
+                        signOut();
+                        onClose();
+                      }}
+                      className="text-sm text-zinc-400 hover:text-white transition-colors text-left"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/signin"
+                      className="text-sm text-zinc-400 hover:text-white transition-colors"
+                      onClick={onClose}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="text-sm text-zinc-400 hover:text-white transition-colors"
+                      onClick={onClose}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
+              </>
+            )}
           </nav>
         </div>
       </div>

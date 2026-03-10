@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { LocationInput } from "./LocationInput";
 import crypto from "crypto";
+import { useSession } from "next-auth/react";
 
 const REPORT_TYPES = [
   "Theft",
@@ -37,6 +38,14 @@ export function ReportForm({ onComplete }: ReportFormProps) {
     longitude: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [anonymous, setAnonymous] = useState(true);
+  const [reporterName, setReporterName] = useState("");
+
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    setAnonymous(!session);
+  }, [session]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -102,6 +111,9 @@ export function ReportForm({ onComplete }: ReportFormProps) {
         longitude: coordinates.longitude,
         image: image,
         status: "PENDING",
+        anonymous,
+        reporterName: anonymous ? null : reporterName,
+        userId: anonymous || !session?.user?.id ? null : parseInt(session.user.id),
       };
 
       const response = await fetch("/api/reports/create", {
@@ -198,6 +210,7 @@ export function ReportForm({ onComplete }: ReportFormProps) {
         <input
           type="file"
           accept="image/*"
+          capture="environment"
           onChange={handleImageUpload}
           className="hidden"
           id="image-upload"
@@ -344,6 +357,40 @@ export function ReportForm({ onComplete }: ReportFormProps) {
           required
         />
       </div>
+
+      {/* Anonymity Option */}
+      {session && (
+        <>
+          <div>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={anonymous}
+                onChange={(e) => setAnonymous(e.target.checked)}
+                className="rounded border-zinc-800 bg-zinc-900 text-sky-500 focus:ring-sky-500"
+              />
+              <span className="text-sm text-zinc-400">Submit anonymously</span>
+            </label>
+          </div>
+
+          {!anonymous && (
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-2">
+                Your Name
+              </label>
+              <input
+                type="text"
+                value={reporterName}
+                onChange={(e) => setReporterName(e.target.value)}
+                className="w-full rounded-xl bg-zinc-900/50 border border-zinc-800 px-4 py-3.5
+                     text-white transition-colors duration-200
+                     focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                required={!anonymous}
+              />
+            </div>
+          )}
+        </>
+      )}
 
       {/* Submit Button */}
       <button

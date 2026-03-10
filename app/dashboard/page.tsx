@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { Report, ReportStatus, ReportType } from "@prisma/client";
 import { signOut } from "next-auth/react";
 
+export const dynamic = 'force-dynamic';
+
 export default function Dashboard() {
   const { data: session } = useSession();
   const [reports, setReports] = useState<Report[]>([]);
